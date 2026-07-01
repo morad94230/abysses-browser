@@ -42,29 +42,22 @@ pub struct CircuitBuilder {
 }
 
 impl CircuitBuilder {
-    pub fn new(pheromone_table: Arc<Mutex<PheromoneTable>>) -> Self {
-        Self { pheromone_table }
-    }
+    pub fn new(table: Arc<Mutex<PheromoneTable>>) -> Self { Self { pheromone_table: table } }
 
     pub async fn build_circuit(&self) -> Result<OnionCircuit, AbyssError> {
         let mut table = self.pheromone_table.lock().await;
         let hop1 = table.select_relay(&[]).ok_or(AbyssError::InsufficientNeighbors(0))?;
         drop(table);
-        let e1 = StaticSecret::random_from_rng(OsRng);
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
         Ok(OnionCircuit {
             hop1,
-            keys: CircuitKeys { e1, shared1: [0u8; 32], nonce2: [0u8; 12], nonce3: [0u8; 12] },
-            created_at: now,
-            expires_at: now + 600,
-            is_active: true,
-            message_count: 0,
-            last_used: now,
+            keys: CircuitKeys::default(),
+            created_at: now, expires_at: now + 600, is_active: true,
+            message_count: 0, last_used: now,
         })
     }
 
     pub fn build_packet(&self, circuit: &OnionCircuit, payload: &FinalPayload) -> Result<OnionPacket, AbyssError> {
-        let shared_keys = [circuit.keys.shared1, [0u8; 32], [0u8; 32]];
-        OnionPacket::build(&circuit.hop1, "HOP2_UNKNOWN", "HOP3_UNKNOWN", &shared_keys, payload)
+        OnionPacket::build(&circuit.hop1, "HOP2", "HOP3", &[circuit.keys.shared1, [0u8;32], [0u8;32]], payload)
     }
 }
