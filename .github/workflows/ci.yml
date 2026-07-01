@@ -6,22 +6,53 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check:
-    name: Check & Lint
+  format:
+    name: Auto Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Run cargo fmt
+        run: cargo fmt --all
+
+      - name: Commit formatting changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          if git diff --quiet; then
+            echo "No formatting changes"
+          else
+            git commit -m "Apply cargo fmt [skip ci]"
+            git push
+          fi
+
+  check:
+    name: Check & Lint
+    needs: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.after }}
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           components: rustfmt, clippy
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
       - name: Check formatting
         run: cargo fmt --all -- --check
       - name: Run clippy
@@ -29,15 +60,13 @@ jobs:
 
   test:
     name: Tests
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
       - name: Run tests
@@ -45,16 +74,13 @@ jobs:
 
   build:
     name: Build
-    needs: [check, test]
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
       - name: Build release
