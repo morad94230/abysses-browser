@@ -1,17 +1,19 @@
+mod api;
+mod circuit;
+mod consensus;
+mod cover_traffic;
 mod error;
-mod types;
 mod identity;
 mod protocol;
-mod circuit;
-mod storage;
-mod consensus;
-mod api;
-mod cover_traffic;
+mod search;
 mod simulator;
+mod storage;
+mod types;
 
-use tracing::info;
 use std::sync::Arc;
+
 use tokio::sync::Mutex;
+use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,6 +24,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _node_identity = identity::NodeIdentity::generate();
     let pheromone_table = Arc::new(Mutex::new(protocol::pheromone::PheromoneTable::default()));
     let _circuit_builder = circuit::builder::CircuitBuilder::new(pheromone_table);
+
+    let search_index = Arc::new(Mutex::new(search::index::SearchIndex::new()));
+    let mut crawler = search::crawler::OrganicCrawler::new(search_index.clone());
+    tokio::spawn(async move {
+        crawler.run().await;
+    });
 
     info!("WebSocket: ws://127.0.0.1:{}", config.websocket_port);
     info!("Proxy: http://127.0.0.1:{}", config.proxy_port);
