@@ -3,21 +3,33 @@ name: Auto Format
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           components: rustfmt
+
       - name: Run cargo fmt
         run: cargo fmt --all
-      - name: Commit changes
+
+      - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
-          git diff --quiet || git commit -m "Apply cargo fmt"
-          git push
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Apply cargo fmt"
+            git push
+          fi
