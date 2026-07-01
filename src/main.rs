@@ -13,7 +13,7 @@ mod types;
 use std::sync::Arc;
 
 use tokio::sync::Mutex;
-use tracing::info;
+use tracing::{error, info};
 
 pub struct AbyssNode {
     pub config: types::NodeConfig,
@@ -52,7 +52,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("Search engine: active");
     info!("Node online — you are the network");
 
-    // Start proxy and WebSocket with search capability
     let node_proxy = node.clone();
     let node_ws = node.clone();
 
@@ -62,8 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    // WebSocket server with search
-    start_websocket_with_search(node_ws).await?;
+    api::ws_server::start_websocket_with_search(node_ws).await?;
 
     Ok(())
 }
