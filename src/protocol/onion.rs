@@ -1,7 +1,8 @@
-use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce};
-use chacha20poly1305::aead::{Aead, AeadCore, OsRng};
+use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce, KeyInit};
+use chacha20poly1305::aead::Aead;
 use serde::{Serialize, Deserialize};
 use std::sync::atomic::{AtomicU64, Ordering};
+use crate::error::AbyssError;
 
 pub const ONION_LAYER_SIZE: usize = 1024;
 pub const MAX_LAYERS: usize = 3;
@@ -56,8 +57,8 @@ pub enum FinalResponse {
 }
 
 impl OnionPacket {
-    pub fn build(hop1_id: &str, hop2_id: &str, hop3_id: &str, shared_keys: &[[u8; 32]; 3], payload: &FinalPayload) -> Result<Self, crate::AbyssError> {
-        let payload_bytes = bincode::serialize(payload).map_err(|e| crate::AbyssError::Encryption(e.to_string()))?;
+    pub fn build(hop1_id: &str, hop2_id: &str, hop3_id: &str, shared_keys: &[[u8; 32]; 3], payload: &FinalPayload) -> Result<Self, AbyssError> {
+        let payload_bytes = bincode::serialize(payload).map_err(|e| AbyssError::Encryption(e.to_string()))?;
         let layer3 = Self::build_layer(hop3_id, "EXIT", &shared_keys[2], &payload_bytes)?;
         let layer2 = Self::build_layer(hop2_id, hop3_id, &shared_keys[1], &bincode::serialize(&layer3).unwrap())?;
         let layer1 = Self::build_layer(hop1_id, hop2_id, &shared_keys[0], &bincode::serialize(&layer2).unwrap())?;
@@ -65,10 +66,10 @@ impl OnionPacket {
         Ok(Self { layers: vec![layer1, layer2, layer3], created_at: now, ttl: MAX_LAYERS as u8 })
     }
 
-    fn build_layer(_current_hop: &str, next_hop: &str, shared_key: &[u8; 32], payload: &[u8]) -> Result<OnionLayer, crate::AbyssError> {
+    fn build_layer(_current_hop: &str, next_hop: &str, shared_key: &[u8; 32], payload: &[u8]) -> Result<OnionLayer, AbyssError> {
         let cipher = ChaCha20Poly1305::new(Key::from_slice(shared_key));
         let nonce = generate_secure_nonce();
-        let encrypted = cipher.encrypt(Nonce::from_slice(&nonce), payload).map_err(|e| crate::AbyssError::Encryption(e.to_string()))?;
+        let encrypted = cipher.encrypt(Nonce::from_slice(&nonce), payload).map_err(|e| AbyssError::Encryption(e.to_string()))?;
         Ok(OnionLayer {
             header: OnionLayerHeader { next_hop: next_hop.to_string(), nonce, padding: vec![0u8; ONION_LAYER_SIZE - 100 - encrypted.len()] },
             encrypted_payload: encrypted,

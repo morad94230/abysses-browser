@@ -27,7 +27,15 @@ impl SitePublisher {
         };
         let content = Content { data: html.to_vec(), metadata: meta };
         let (fragments, root_hash) = Fragmenter::fragment(&content, &self.identity.ed25519_keypair).map_err(|e| e)?;
-        self.cache.store(root_hash, fragments.clone());
+        let cache_fragments: Vec<crate::storage::cache::Fragment> = fragments.iter().map(|f| {
+            crate::storage::cache::Fragment {
+                index: f.index,
+                data: f.data.clone(),
+                hash: f.hash,
+                root_hash: f.root_hash,
+            }
+        }).collect();
+        self.cache.store(root_hash, cache_fragments);
         Ok((root_hash, fragments.len()))
     }
 }

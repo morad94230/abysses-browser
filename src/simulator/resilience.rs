@@ -1,4 +1,4 @@
-use crate::simulator::network::{SimulatedNetwork, SimulatedMessage};
+use crate::simulator::network::SimulatedNetwork;
 
 pub struct ResilienceTest {
     pub network: SimulatedNetwork,

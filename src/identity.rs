@@ -1,15 +1,15 @@
-use ed25519_dalek::Keypair;
+use ed25519_dalek::SigningKey;
 use rand::rngs::OsRng;
 use x25519_dalek::{StaticSecret, PublicKey as X25519PublicKey};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Clone, Debug)]
 pub struct NodeIdentity {
-    pub ed25519_keypair: Keypair,
+    pub ed25519_keypair: SigningKey,
     pub peer_id: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct EphemeralIdentity {
     pub x25519_secret: StaticSecret,
     pub x25519_public: X25519PublicKey,
@@ -28,8 +28,8 @@ pub struct IdentityWallet {
 impl NodeIdentity {
     pub fn generate() -> Self {
         let mut csprng = OsRng;
-        let keypair = Keypair::generate(&mut csprng);
-        let peer_id = hex::encode(keypair.public.to_bytes());
+        let keypair = SigningKey::generate(&mut csprng);
+        let peer_id = hex::encode(keypair.verifying_key().to_bytes());
         Self {
             ed25519_keypair: keypair,
             peer_id,

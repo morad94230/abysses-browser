@@ -1,5 +1,6 @@
 use reed_solomon_erasure::galois_8::ReedSolomon;
 use serde::{Serialize, Deserialize};
+use ed25519_dalek::SigningKey;
 
 pub const DATA_SHARDS: usize = 10;
 pub const PARITY_SHARDS: usize = 5;
@@ -12,7 +13,7 @@ pub struct Fragment {
     pub hash: [u8; 32],
     pub root_hash: [u8; 32],
     pub ttl: u32,
-    pub signature: [u8; 64],
+    pub signature: Vec<u8>,
     pub shard_index: usize,
 }
 
@@ -37,7 +38,7 @@ pub struct ContentMetadata {
 pub struct Fragmenter;
 
 impl Fragmenter {
-    pub fn fragment(content: &Content, keypair: &ed25519_dalek::Keypair) -> Result<(Vec<Fragment>, [u8; 32]), String> {
+    pub fn fragment(content: &Content, keypair: &SigningKey) -> Result<(Vec<Fragment>, [u8; 32]), String> {
         let data = &content.data;
         let chunk_size = (data.len() + DATA_SHARDS - 1) / DATA_SHARDS;
         let mut padded = data.clone();
@@ -55,9 +56,34 @@ impl Fragmenter {
             let sig = keypair.sign(&hashes[i]);
             Fragment {
                 index: i as u8, data: s.clone(), hash: hashes[i], root_hash: root,
-                ttl: 86400, signature: sig.to_bytes(), shard_index: i,
+                ttl: 86400, signature: sig.to_vec(), shard_index: i,
             }
         }).collect();
         Ok((fragments, root))
+    }
+
+    pub fn reconstruct_fragments(fragments: &[Fragment]) -> Result<Content, String> {
+        if fragments.len() < DATA_SHARDS {
+            return Err("Not enough fragments".to_string());
+        }
+        let chunk_size = fragments[0].data.len();
+        let mut shards: Vec<Option<Vec<u8>>> = vec![None; TOTAL_SHARDS];
+        for f in fragments { shards[f.shard_index] = Some(f.data.clone()); }
+        let r = ReedSolomon::new(DATA_SHARDS, PARITY_SHARDS).map_err(|e| e.to_string())?;
+        r.reconstruct(&mut shards).map_err(|e| e.to_string())?;
+        let mut data = Vec::new();
+        for i in 0..DATA_SHARDS {
+            if let Some(s) = &shards[i] { data.extend_from_slice(s); }
+        }
+        let mut end = data.len();
+        while end > 0 && data[end-1] == 0 { end -= 1; }
+        Ok(Content {
+            data: data[..end].to_vec(),
+            metadata: ContentMetadata {
+                name: String::new(), description: String::new(),
+                created_at: 0, expires_at: 0, owner: String::new(),
+                mime_type: String::new(), tags: vec![], original_size: end,
+            },
+        })
     }
 }

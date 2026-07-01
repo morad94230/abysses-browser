@@ -1,13 +1,13 @@
 use crate::protocol::onion::{OnionPacket, FinalPayload};
 use crate::protocol::pheromone::PheromoneTable;
-use crate::AbyssError;
-use x25519_dalek::{StaticSecret, PublicKey};
+use crate::error::AbyssError;
+use x25519_dalek::StaticSecret;
 use rand::rngs::OsRng;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct CircuitKeys {
     pub e1: StaticSecret,
     pub shared1: [u8; 32],
@@ -15,7 +15,7 @@ pub struct CircuitKeys {
     pub nonce3: [u8; 12],
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct OnionCircuit {
     pub hop1: String,
     pub keys: CircuitKeys,

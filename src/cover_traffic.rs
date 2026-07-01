@@ -21,8 +21,8 @@ impl CoverTrafficGenerator {
         let mut rng = rand::thread_rng();
         while self.running {
             let base = self.mean_interval_ms as f64;
-            let jitter = rng.gen_range(0.5..1.5);
-            let delay_ms = (-rng.gen::<f64>().ln() * base * jitter) as u64;
+            let jitter = rng.r#gen::<f64>() * 1.0 + 0.5;
+            let delay_ms = (-rng.r#gen::<f64>().ln() * base * jitter) as u64;
             sleep(Duration::from_millis(delay_ms)).await;
             let circuit_id = {
                 let manager = self.circuit_manager.lock().await;
@@ -39,7 +39,7 @@ impl CoverTrafficGenerator {
                 }
             };
             let cover = FinalPayload::CoverTraffic {
-                nonce: rng.gen::<[u8; 32]>(),
+                nonce: rng.r#gen::<[u8; 32]>(),
                 padding: vec![0u8; 900],
             };
             let mut manager = self.circuit_manager.lock().await;

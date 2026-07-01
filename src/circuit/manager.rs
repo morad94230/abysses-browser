@@ -1,7 +1,7 @@
 use crate::circuit::builder::{OnionCircuit, CircuitBuilder};
 use crate::circuit::health::{CircuitHealth, CircuitHealthChecker};
 use crate::protocol::onion::FinalPayload;
-use crate::AbyssError;
+use crate::error::AbyssError;
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 

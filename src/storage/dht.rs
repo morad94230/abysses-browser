@@ -13,10 +13,10 @@ pub struct NameRecord {
     pub name: String,
     pub root_hash: [u8; 32],
     pub owner: String,
-    pub owner_public_key: [u8; 32],
+    pub owner_public_key: Vec<u8>,
     pub created_at: u64,
     pub ttl: u32,
-    pub signature: [u8; 64],
+    pub signature: Vec<u8>,
     pub pow_nonce: u64,
     pub pow_difficulty: u8,
 }

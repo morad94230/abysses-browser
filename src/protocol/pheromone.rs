@@ -64,15 +64,15 @@ impl PheromoneTable {
             .cloned().collect();
         if available.is_empty() { return None; }
         let mut rng = rand::thread_rng();
-        if rng.gen::<f64>() < self.exploration_threshold {
-            return Some(available[rng.gen_range(0..available.len())].clone());
+        if rng.r#gen::<f64>() < self.exploration_threshold {
+            return Some(available[rng.r#gen::<usize>() % available.len()].clone());
         }
         let scores: Vec<f64> = available.iter()
             .map(|id| self.scores.get(id).map(|s| s.composite_score()).unwrap_or(0.0)).collect();
         let total: f64 = scores.iter().sum();
-        if total == 0.0 { return Some(available[rng.gen_range(0..available.len())].clone()); }
+        if total == 0.0 { return Some(available[rng.r#gen::<usize>() % available.len()].clone()); }
         let mut cum = 0.0;
-        let target = rng.gen::<f64>() * total;
+        let target = rng.r#gen::<f64>() * total;
         for (i, s) in scores.iter().enumerate() { cum += s; if cum >= target { return Some(available[i].clone()); } }
         Some(available.last().unwrap().clone())
     }
