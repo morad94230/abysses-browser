@@ -14,4 +14,14 @@ pub enum AbyssError {
     NoActiveCircuit,
     #[error("Insufficient neighbors: {0}")]
     InsufficientNeighbors(usize),
+    #[error("Serialization error: {0}")]
+    SerializationError(String),
+    #[error("IO error: {0}")]
+    IoError(String),
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+    #[error("Not found: {0}")]
+    NotFound(String),
+    #[error("Consensus error: {0}")]
+    ConsensusError(String),
 }
