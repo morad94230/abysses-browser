@@ -9,7 +9,7 @@ pub struct ChainEntry {
     pub timestamp: u64,
     pub nonce: u64,
     pub difficulty: u8,
-    pub signature: [u8; 64],
+    pub signature: Vec<u8>,
     pub hash: [u8; 32],
 }
 

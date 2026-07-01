@@ -1,4 +1,4 @@
-use ed25519_dalek::SigningKey;
+use ed25519_dalek::{SigningKey, Signer};
 use rand::rngs::OsRng;
 use x25519_dalek::{StaticSecret, PublicKey as X25519PublicKey};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -16,6 +16,17 @@ pub struct EphemeralIdentity {
     pub created_at: u64,
     pub suggested_expires_at: u64,
     pub active_circuits: usize,
+}
+
+impl std::fmt::Debug for EphemeralIdentity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("EphemeralIdentity")
+            .field("x25519_public", &self.x25519_public)
+            .field("created_at", &self.created_at)
+            .field("suggested_expires_at", &self.suggested_expires_at)
+            .field("active_circuits", &self.active_circuits)
+            .finish()
+    }
 }
 
 #[derive(Debug, Clone)]

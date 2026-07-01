@@ -1,6 +1,6 @@
 use reed_solomon_erasure::galois_8::ReedSolomon;
 use serde::{Serialize, Deserialize};
-use ed25519_dalek::SigningKey;
+use ed25519_dalek::{SigningKey, Signer};
 
 pub const DATA_SHARDS: usize = 10;
 pub const PARITY_SHARDS: usize = 5;
@@ -66,7 +66,7 @@ impl Fragmenter {
         if fragments.len() < DATA_SHARDS {
             return Err("Not enough fragments".to_string());
         }
-        let chunk_size = fragments[0].data.len();
+        let _chunk_size = fragments[0].data.len();
         let mut shards: Vec<Option<Vec<u8>>> = vec![None; TOTAL_SHARDS];
         for f in fragments { shards[f.shard_index] = Some(f.data.clone()); }
         let r = ReedSolomon::new(DATA_SHARDS, PARITY_SHARDS).map_err(|e| e.to_string())?;

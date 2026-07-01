@@ -7,12 +7,23 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct CircuitKeys {
     pub e1: StaticSecret,
     pub shared1: [u8; 32],
     pub nonce2: [u8; 12],
     pub nonce3: [u8; 12],
+}
+
+impl Default for CircuitKeys {
+    fn default() -> Self {
+        Self {
+            e1: StaticSecret::random_from_rng(OsRng),
+            shared1: [0u8; 32],
+            nonce2: [0u8; 12],
+            nonce3: [0u8; 12],
+        }
+    }
 }
 
 #[derive(Clone)]
