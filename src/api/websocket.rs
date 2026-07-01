@@ -4,7 +4,12 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ClientMessage {
     Navigate { tab_id: u64, url: String },
-    Publish { tab_id: u64, name: String, content: Vec<u8>, mime_type: String },
+    Publish {
+        tab_id: u64,
+        name: String,
+        content: Vec<u8>,
+        mime_type: String,
+    },
     Resolve { request_id: String, name: String },
     RotateIdentity { tab_id: u64 },
     GetTopology,
@@ -41,7 +46,10 @@ pub enum ServerMessage {
         tab_id: u64,
         results: Vec<SearchResultItem>,
     },
-    Error { code: String, message: String },
+    Error {
+        code: String,
+        message: String,
+    },
     Pong,
 }
 

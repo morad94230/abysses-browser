@@ -6,7 +6,7 @@ use tokio::sync::Mutex;
 use tokio_tungstenite::{accept_async, tungstenite::Message};
 use tracing::{error, info};
 
-use crate::api::websocket::{ClientMessage, ServerMessage, SearchResultItem};
+use crate::api::websocket::{ClientMessage, SearchResultItem, ServerMessage};
 use crate::search::index::SearchIndex;
 use crate::AbyssNode;
 
@@ -15,7 +15,7 @@ pub async fn start_websocket_with_search(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let addr = format!("127.0.0.1:{}", node.config.websocket_port);
     let listener = TcpListener::bind(&addr).await?;
-    info!("📡 WebSocket server listening on ws://{}", addr);
+    info!("WebSocket server listening on ws://{}", addr);
 
     while let Ok((stream, _)) = listener.accept().await {
         let node = node.clone();
@@ -80,9 +80,11 @@ async fn handle_message(msg: ClientMessage, node: &AbyssNode) -> ServerMessage {
                     trust_score: p.trust_score,
                 })
                 .collect();
-            ServerMessage::SearchResult { tab_id, results: items }
+            ServerMessage::SearchResult {
+                tab_id,
+                results: items,
+            }
         }
-        // Conserver les autres messages (simplifiés ici, on peut les rajouter plus tard)
         _ => ServerMessage::Error {
             code: "NOT_IMPLEMENTED".into(),
             message: "Feature not yet available via WebSocket".into(),
