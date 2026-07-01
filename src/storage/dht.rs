@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 pub fn fragment_key(root_hash: &[u8; 32], index: u8) -> String {
     format!("abyss:fragment:{}:{:02x}", hex::encode(root_hash), index)

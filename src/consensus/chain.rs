@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -15,9 +15,19 @@ pub struct ChainEntry {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum EntryType {
-    NameRegistration { name: String, root_hash: [u8; 32], owner: String, ttl: u32 },
-    NameUpdate { name: String, new_root_hash: [u8; 32] },
-    NameRevocation { name: String },
+    NameRegistration {
+        name: String,
+        root_hash: [u8; 32],
+        owner: String,
+        ttl: u32,
+    },
+    NameUpdate {
+        name: String,
+        new_root_hash: [u8; 32],
+    },
+    NameRevocation {
+        name: String,
+    },
 }
 
 pub struct SignedChain {
@@ -27,13 +37,18 @@ pub struct SignedChain {
 
 impl SignedChain {
     pub fn new() -> Self {
-        Self { entries: vec![], name_index: HashMap::new() }
+        Self {
+            entries: vec![],
+            name_index: HashMap::new(),
+        }
     }
 
     pub fn resolve(&self, name: &str) -> Option<[u8; 32]> {
-        self.name_index.get(name).and_then(|&idx| match &self.entries[idx].entry_type {
-            EntryType::NameRegistration { root_hash, .. } => Some(*root_hash),
-            _ => None,
-        })
+        self.name_index
+            .get(name)
+            .and_then(|&idx| match &self.entries[idx].entry_type {
+                EntryType::NameRegistration { root_hash, .. } => Some(*root_hash),
+                _ => None,
+            })
     }
 }

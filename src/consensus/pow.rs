@@ -10,11 +10,15 @@ impl LightPow {
         let result = hasher.finalize();
         let bytes = result.as_bytes();
         for i in 0..(difficulty as usize / 8) {
-            if bytes[i] != 0 { return false; }
+            if bytes[i] != 0 {
+                return false;
+            }
         }
         if difficulty % 8 != 0 {
             let mask = 0xFFu8 << (8 - difficulty % 8);
-            if bytes[difficulty as usize / 8] & mask != 0 { return false; }
+            if bytes[difficulty as usize / 8] & mask != 0 {
+                return false;
+            }
         }
         true
     }
@@ -22,7 +26,9 @@ impl LightPow {
     pub fn mine(hash: &[u8; 32], difficulty: u8) -> u64 {
         let mut nonce = 0u64;
         loop {
-            if Self::verify(hash, nonce, difficulty) { return nonce; }
+            if Self::verify(hash, nonce, difficulty) {
+                return nonce;
+            }
             nonce += 1;
         }
     }

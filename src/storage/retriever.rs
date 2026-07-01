@@ -1,5 +1,5 @@
-use crate::storage::erasure::{Fragmenter, Content, DATA_SHARDS};
 use crate::storage::cache::OrganicCache;
+use crate::storage::erasure::{Content, Fragmenter, DATA_SHARDS};
 use ed25519_dalek::VerifyingKey;
 
 pub struct SiteRetriever {
@@ -17,8 +17,9 @@ impl SiteRetriever {
             return Err("Not enough fragments".to_string());
         }
         // Conversion des fragments cache vers fragments erasure
-        let era_fragments: Vec<crate::storage::erasure::Fragment> = fragments.iter().map(|f| {
-            crate::storage::erasure::Fragment {
+        let era_fragments: Vec<crate::storage::erasure::Fragment> = fragments
+            .iter()
+            .map(|f| crate::storage::erasure::Fragment {
                 index: f.index,
                 data: f.data.clone(),
                 hash: f.hash,
@@ -26,8 +27,8 @@ impl SiteRetriever {
                 ttl: 86400,
                 signature: vec![],
                 shard_index: f.index as usize,
-            }
-        }).collect();
+            })
+            .collect();
         // Pour le MVP, on ignore la vérification de signature
         let reconstructed = Fragmenter::reconstruct_fragments(&era_fragments)?;
         Ok(reconstructed)

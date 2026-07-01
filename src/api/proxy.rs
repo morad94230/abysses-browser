@@ -6,7 +6,8 @@ use hyper::{Body, Request, Response, Server};
 
 pub async fn start_proxy(port: u16) -> Result<(), Box<dyn std::error::Error>> {
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
-    let make_svc = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle_request)) });
+    let make_svc =
+        make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle_request)) });
     let server = Server::bind(&addr).serve(make_svc);
     server.await?;
     Ok(())
@@ -30,7 +31,10 @@ async fn handle_request(req: Request<Body>) -> Result<Response<Body>, Infallible
             .body(Body::from(html))
             .unwrap())
     } else if req.uri().path() == "/health" {
-        Ok(Response::builder().status(200).body(Body::from("OK")).unwrap())
+        Ok(Response::builder()
+            .status(200)
+            .body(Body::from("OK"))
+            .unwrap())
     } else {
         Ok(Response::builder()
             .status(403)

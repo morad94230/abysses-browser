@@ -1,9 +1,9 @@
 use crate::circuit::manager::CircuitManager;
 use crate::protocol::onion::FinalPayload;
+use rand::Rng;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::time::{sleep, Duration};
-use rand::Rng;
 
 pub struct CoverTrafficGenerator {
     pub mean_interval_ms: u64,
@@ -13,7 +13,11 @@ pub struct CoverTrafficGenerator {
 
 impl CoverTrafficGenerator {
     pub fn new(mean_interval_ms: u64, circuit_manager: Arc<Mutex<CircuitManager>>) -> Self {
-        Self { mean_interval_ms, circuit_manager, running: false }
+        Self {
+            mean_interval_ms,
+            circuit_manager,
+            running: false,
+        }
     }
 
     pub async fn run(&mut self) {
@@ -47,5 +51,7 @@ impl CoverTrafficGenerator {
         }
     }
 
-    pub fn stop(&mut self) { self.running = false; }
+    pub fn stop(&mut self) {
+        self.running = false;
+    }
 }

@@ -14,19 +14,24 @@ pub struct TrustNode {
 
 impl TrustGraph {
     pub fn new() -> Self {
-        Self { nodes: HashMap::new() }
+        Self {
+            nodes: HashMap::new(),
+        }
     }
 
     pub fn add_endorsement(&mut self, from: &str, to: &str, level: f64) {
-        let node = self.nodes.entry(from.to_string())
+        let node = self
+            .nodes
+            .entry(from.to_string())
             .or_insert_with(|| TrustNode {
                 peer_id: from.to_string(),
                 trust_score: 0.5,
                 endorsements: HashMap::new(),
             });
         node.endorsements.insert(to.to_string(), level);
-        
-        self.nodes.entry(to.to_string())
+
+        self.nodes
+            .entry(to.to_string())
             .or_insert_with(|| TrustNode {
                 peer_id: to.to_string(),
                 trust_score: 0.5,
@@ -41,10 +46,12 @@ impl TrustGraph {
     }
 
     fn dfs_trust(&self, peer: &str, weight: f64, depth: usize, visited: &mut HashMap<String, f64>) {
-        if depth == 0 || weight < 0.01 { return; }
+        if depth == 0 || weight < 0.01 {
+            return;
+        }
         let current = visited.entry(peer.to_string()).or_insert(0.0);
         *current += weight;
-        
+
         if let Some(node) = self.nodes.get(peer) {
             for (endorsed, level) in &node.endorsements {
                 self.dfs_trust(endorsed, weight * level * 0.5, depth - 1, visited);

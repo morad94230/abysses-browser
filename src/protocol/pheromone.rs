@@ -1,6 +1,6 @@
+use rand::Rng;
 use std::collections::HashMap;
 use std::time::Instant;
-use rand::Rng;
 
 #[derive(Clone, Debug)]
 pub struct PheromoneScore {
@@ -12,7 +12,12 @@ pub struct PheromoneScore {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum NeighborState { Healthy, Degraded, Unreachable, Blacklisted }
+pub enum NeighborState {
+    Healthy,
+    Degraded,
+    Unreachable,
+    Blacklisted,
+}
 
 #[derive(Clone, Debug)]
 pub struct PheromoneTable {
@@ -120,19 +125,18 @@ impl PheromoneTable {
     pub fn deposit_success(&mut self, relay: &str, latency_ms: f64) {
         if let Some(s) = self.scores.get_mut(relay) {
             s.success_count += 1;
-            s.success_rate =
-                s.success_count as f64 / (s.success_count + s.failure_count) as f64;
+            s.success_rate = s.success_count as f64 / (s.success_count + s.failure_count) as f64;
             s.latency_ms = 0.3 * latency_ms + 0.7 * s.latency_ms;
             s.last_updated = Instant::now();
-            self.states.insert(relay.to_string(), NeighborState::Healthy);
+            self.states
+                .insert(relay.to_string(), NeighborState::Healthy);
         }
     }
 
     pub fn deposit_failure(&mut self, relay: &str) {
         if let Some(s) = self.scores.get_mut(relay) {
             s.failure_count += 1;
-            s.success_rate =
-                s.success_count as f64 / (s.success_count + s.failure_count) as f64;
+            s.success_rate = s.success_count as f64 / (s.success_count + s.failure_count) as f64;
             s.last_updated = Instant::now();
             if s.failure_count >= self.blacklist_threshold as u64 {
                 self.states

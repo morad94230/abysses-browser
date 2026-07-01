@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PageEntry {
@@ -39,7 +39,7 @@ impl SearchIndex {
     pub fn search(&self, query: &str) -> Vec<&PageEntry> {
         let terms: Vec<&str> = query.split_whitespace().collect();
         let mut results: HashMap<&str, f64> = HashMap::new();
-        
+
         for term in &terms {
             if let Some(urls) = self.keyword_index.get(*term) {
                 for url in urls {
@@ -50,10 +50,13 @@ impl SearchIndex {
                 }
             }
         }
-        
-        let mut sorted: Vec<(&str, f64)> = results.iter().map(|(k,v)| (*k, *v)).collect();
+
+        let mut sorted: Vec<(&str, f64)> = results.iter().map(|(k, v)| (*k, *v)).collect();
         sorted.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-        
-        sorted.iter().filter_map(|(url, _)| self.pages.get(url)).collect()
+
+        sorted
+            .iter()
+            .filter_map(|(url, _)| self.pages.get(url))
+            .collect()
     }
 }

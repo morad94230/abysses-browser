@@ -1,6 +1,6 @@
-use crate::storage::erasure::{Fragmenter, Content, ContentMetadata};
-use crate::storage::cache::OrganicCache;
 use crate::identity::NodeIdentity;
+use crate::storage::cache::OrganicCache;
+use crate::storage::erasure::{Content, ContentMetadata, Fragmenter};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct SitePublisher {
@@ -13,8 +13,16 @@ impl SitePublisher {
         Self { identity, cache }
     }
 
-    pub async fn publish(&mut self, name: &str, html: &[u8], desc: &str) -> Result<([u8; 32], usize), String> {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    pub async fn publish(
+        &mut self,
+        name: &str,
+        html: &[u8],
+        desc: &str,
+    ) -> Result<([u8; 32], usize), String> {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
         let meta = ContentMetadata {
             name: name.to_string(),
             description: desc.to_string(),
@@ -25,16 +33,21 @@ impl SitePublisher {
             tags: vec![],
             original_size: html.len(),
         };
-        let content = Content { data: html.to_vec(), metadata: meta };
-        let (fragments, root_hash) = Fragmenter::fragment(&content, &self.identity.ed25519_keypair).map_err(|e| e)?;
-        let cache_fragments: Vec<crate::storage::cache::Fragment> = fragments.iter().map(|f| {
-            crate::storage::cache::Fragment {
+        let content = Content {
+            data: html.to_vec(),
+            metadata: meta,
+        };
+        let (fragments, root_hash) =
+            Fragmenter::fragment(&content, &self.identity.ed25519_keypair).map_err(|e| e)?;
+        let cache_fragments: Vec<crate::storage::cache::Fragment> = fragments
+            .iter()
+            .map(|f| crate::storage::cache::Fragment {
                 index: f.index,
                 data: f.data.clone(),
                 hash: f.hash,
                 root_hash: f.root_hash,
-            }
-        }).collect();
+            })
+            .collect();
         self.cache.store(root_hash, cache_fragments);
         Ok((root_hash, fragments.len()))
     }
