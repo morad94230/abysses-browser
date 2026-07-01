@@ -1,7 +1,7 @@
 [package]
 name = "abyss-node"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 authors = ["Abysses Team"]
 description = "Radically decentralized darkweb browser node"
 license = "AGPL-3.0"
