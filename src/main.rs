@@ -38,7 +38,10 @@ async fn main() -> Result<()> {
 
     // Initialize identity
     let identity = identity::NodeIdentity::new();
-    info!("Node identity: {}", hex::encode(&identity.public_key()[..8]));
+    info!(
+        "Node identity: {}",
+        hex::encode(&identity.public_key()[..8])
+    );
 
     // Initialize storage
     let cache = storage::cache::Cache::new(1000);
