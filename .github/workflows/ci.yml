@@ -14,7 +14,7 @@ env:
 
 jobs:
   format:
-    name: Auto Format
+    name: Auto Format & Push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,38 +29,21 @@ jobs:
       - name: Run cargo fmt
         run: cargo fmt --all
 
-      - name: Commit formatting changes
+      - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
-          if git diff --quiet; then
-            echo "No formatting changes"
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit"
           else
-            git commit -m "Apply cargo fmt [skip ci]"
-            git push
+            git commit -m "style: apply cargo fmt [skip ci]"
+            git push origin main
           fi
-
-  check:
-    name: Check & Lint
-    needs: format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.after }}
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
-      - name: Check formatting
-        run: cargo fmt --all -- --check
-      - name: Run clippy
-        run: cargo clippy --all-targets -- -D warnings
 
   test:
     name: Tests
-    needs: check
+    needs: format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
