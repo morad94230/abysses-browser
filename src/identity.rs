@@ -1,4 +1,4 @@
-use ed25519_dalek::{SigningKey, Signer};
+use ed25519_dalek::{SigningKey, Signer, VerifyingKey};
 use rand::rngs::OsRng;
 use x25519_dalek::{StaticSecret, PublicKey as X25519PublicKey};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -50,12 +50,13 @@ impl NodeIdentity {
     pub fn generate() -> Self {
         let mut csprng = OsRng;
         let keypair = SigningKey::generate(&mut csprng);
-        let peer_id = hex::encode(keypair.verifying_key().to_bytes());
+        let vk = VerifyingKey::from(&keypair);
+        let peer_id = hex::encode(vk.to_bytes());
         Self { ed25519_keypair: keypair, peer_id }
     }
 
     pub fn sign(&self, message: &[u8]) -> ed25519_dalek::Signature {
-        Signer::sign(&self.ed25519_keypair, message)
+        self.ed25519_keypair.sign(message)
     }
 }
 
