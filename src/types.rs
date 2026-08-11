@@ -18,7 +18,7 @@ impl Default for NodeConfig {
     fn default() -> Self {
         Self {
             websocket_port: 9000,
-            proxy_port: 8080,
+            proxy_port: 9001,
         }
     }
 }
