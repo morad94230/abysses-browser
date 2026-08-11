@@ -49,42 +49,55 @@
             padding: 20px;
         }
 
-        /* La pieuvre SVG */
+        /* Conteneur pour l'image de la pieuvre */
         .octopus-container {
             position: relative;
-            width: 320px;
-            height: 200px;
+            width: 720px;
+            max-width: 92vw;
+            height: auto;
             animation: floaty 6s ease-in-out infinite;
             filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.35));
         }
 
         @keyframes floaty {
-            0%,100% { transform: translateY(0) rotate(-1deg); }
-            50% { transform: translateY(-8px) rotate(1deg); }
+            0%,100% { transform: translateY(0) rotate(-0.8deg); }
+            50% { transform: translateY(-8px) rotate(0.8deg); }
         }
 
-        .octopus-container svg { width: 100%; height: 100%; }
-
-        /* Tentacles animation - utilise transform sur chaque groupe */
-        .tentacle {
-            transform-origin: 50% 10%;
-            animation: tentacle 3.6s ease-in-out infinite;
+        .octopus-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            transition: transform 0.3s ease;
+            will-change: transform;
         }
-        .tentacle.t1 { animation-delay: 0s; }
-        .tentacle.t2 { animation-delay: 0.2s; }
-        .tentacle.t3 { animation-delay: 0.4s; }
-        .tentacle.t4 { animation-delay: 0.6s; }
-        .tentacle.t5 { animation-delay: 0.8s; }
-        .tentacle.t6 { animation-delay: 1s; }
-        .tentacle.t7 { animation-delay: 1.2s; }
-        .tentacle.t8 { animation-delay: 1.4s; }
 
-        @keyframes tentacle {
-            0% { transform: rotate(0deg) translateY(0px); }
-            25% { transform: rotate(-8deg) translateY(-6px) ; }
-            50% { transform: rotate(0deg) translateY(-12px); }
-            75% { transform: rotate(8deg) translateY(-6px); }
-            100% { transform: rotate(0deg) translateY(0px); }
+        /* léger parallax / sway quand on survole */
+        .octopus-container:hover .octopus-image {
+            transform: translateY(-6px) scale(1.01);
+        }
+
+        /* Survol du curseur : yeux suivent le pointeur (si image possède des yeux au centre visuel) */
+        .octopus-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .octopus-glow {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 30%;
+            height: 30%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 30%, rgba(0,212,255,0.18), transparent 40%);
+            mix-blend-mode: screen;
+            pointer-events: none;
         }
 
         /* Titre */
@@ -169,7 +182,7 @@
         /* Responsive */
         @media (max-width: 600px) {
             .title { font-size: 2.4em; }
-            .octopus-container { width: 240px; height: 160px; }
+            .octopus-container { width: 92vw; }
             .stats { gap: 20px; }
             .search-input { padding: 15px 50px 15px 18px; font-size: 0.95em; }
         }
@@ -194,78 +207,13 @@
 
     <div class="main-container">
 
-        <!-- Pieuvre des abysses en SVG -->
-        <div class="octopus-container">
-            <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" aria-label="Pieuvre des abysses">
-                <defs>
-                    <radialGradient id="headGrad" cx="50%" cy="40%" r="60%">
-                        <stop offset="0%" stop-color="#6fefff" stop-opacity="0.95" />
-                        <stop offset="60%" stop-color="#00425a" stop-opacity="0.95" />
-                        <stop offset="100%" stop-color="#001021" stop-opacity="0.95" />
-                    </radialGradient>
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="6" result="coloredBlur" />
-                        <feMerge>
-                          <feMergeNode in="coloredBlur" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                </defs>
-
-                <!-- Tentacles (groups with paths) -->
-                <g transform="translate(180,110)">
-                    <g class="tentacle t1" transform="rotate(120)">
-                        <path d="M0,0 C-8,20 -18,50 -6,82 C2,100 -6,128 8,150" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M0,0 C-6,16 -14,42 -4,68 C1,84 -4,108 6,126" stroke="#00d4ff" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.25"/>
-                    </g>
-
-                    <g class="tentacle t2" transform="rotate(100)">
-                        <path d="M0,0 C-6,18 -14,46 -2,78 C8,100 2,128 16,148" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <g class="tentacle t3" transform="rotate(80)">
-                        <path d="M0,0 C-4,16 -8,40 4,72 C12,92 8,120 22,140" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <g class="tentacle t4" transform="rotate(40)">
-                        <path d="M0,0 C4,10 12,36 18,64 C22,86 26,114 36,136" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <g class="tentacle t5" transform="rotate(0)">
-                        <path d="M0,0 C6,8 16,32 26,58 C34,80 40,110 50,132" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <g class="tentacle t6" transform="rotate(-40)">
-                        <path d="M0,0 C-6,10 -16,34 -28,60 C-36,82 -44,112 -56,134" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <g class="tentacle t7" transform="rotate(-80)">
-                        <path d="M0,0 C-4,12 -10,36 -18,68 C-24,90 -32,120 -44,142" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <g class="tentacle t8" transform="rotate(-100)">
-                        <path d="M0,0 C-8,22 -20,56 -10,90 C-2,110 -8,132 -18,152" stroke="#003b4f" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    </g>
-
-                    <!-- Corps / tête -->
-                    <g>
-                        <ellipse cx="0" cy="-10" rx="70" ry="52" fill="url(#headGrad)" stroke="#00d4ff" stroke-width="2" filter="url(#glow)"/>
-                        <!-- Yeux -->
-                        <g transform="translate(-28,-20)">
-                            <ellipse cx="0" cy="0" rx="10" ry="14" fill="#0b1220" />
-                            <circle cx="-2" cy="-4" r="3" fill="#fff" opacity="0.9" />
-                        </g>
-                        <g transform="translate(28,-20)">
-                            <ellipse cx="0" cy="0" rx="10" ry="14" fill="#0b1220" />
-                            <circle cx="-2" cy="-4" r="3" fill="#fff" opacity="0.9" />
-                        </g>
-
-                        <!-- Siphon luminance (petit cercle bioluminescent) -->
-                        <circle cx="0" cy="8" r="6" fill="#00f0ff" opacity="0.9" />
-                    </g>
-                </g>
-
-            </svg>
+        <!-- Pieuvre des abysses (image utilisateur) -->
+        <div class="octopus-container" id="octoContainer">
+            <!-- Place image here: upload votre image à assets/octopus.png dans le repo, ou fournissez une URL publique. -->
+            <img class="octopus-image" id="octoImg" src="assets/octopus.png" alt="Pieuvre des abysses">
+            <div class="octopus-overlay">
+                <div class="octopus-glow" id="octoGlow"></div>
+            </div>
         </div>
 
         <!-- Titre -->
@@ -306,7 +254,6 @@
         function search() {
             const query = document.getElementById('searchInput').value.trim();
             if (query) {
-                // Pour l'instant, redirige vers une recherche simulée
                 document.getElementById('searchInput').value = '';
                 document.getElementById('searchInput').placeholder = 'Recherche en cours dans les abysses...';
                 setTimeout(() => {
@@ -327,6 +274,25 @@
                 nodeCount.textContent = Math.floor(Math.random() * 30 + 5);
             }
         }, 5000);
+
+        // Petit script pour déplacer un point lumineux vers le curseur (effet d'interaction)
+        (function() {
+            const glow = document.getElementById('octoGlow');
+            const container = document.getElementById('octoContainer');
+            if (!glow || !container) return;
+            container.addEventListener('mousemove', e => {
+                const r = container.getBoundingClientRect();
+                const x = ((e.clientX - r.left) / r.width) * 100;
+                const y = ((e.clientY - r.top) / r.height) * 100;
+                glow.style.left = x + '%';
+                glow.style.top = y + '%';
+                glow.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
+            container.addEventListener('mouseleave', () => {
+                glow.style.left = '50%';
+                glow.style.top = '50%';
+            });
+        })();
     </script>
 </body>
 </html>
