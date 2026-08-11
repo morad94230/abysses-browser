@@ -49,26 +49,44 @@
             padding: 20px;
         }
 
-        /* Le requin SVG */
-        .shark-container {
+        /* La pieuvre SVG */
+        .octopus-container {
             position: relative;
-            width: 280px;
-            height: 140px;
-            animation: swim 6s ease-in-out infinite;
+            width: 300px;
+            height: 300px;
+            animation: float 6s ease-in-out infinite;
         }
 
-        @keyframes swim {
-            0%, 100% { transform: translateX(0) translateY(0); }
-            25% { transform: translateX(20px) translateY(-12px); }
-            50% { transform: translateX(0) translateY(-20px); }
-            75% { transform: translateX(-20px) translateY(-8px); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotateZ(0deg); }
+            25% { transform: translateY(-15px) rotateZ(2deg); }
+            50% { transform: translateY(-25px) rotateZ(-1deg); }
+            75% { transform: translateY(-10px) rotateZ(1deg); }
         }
 
-        .shark-container svg {
+        .octopus-container svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.4));
+            filter: drop-shadow(0 0 40px rgba(0, 212, 255, 0.3)) drop-shadow(0 0 20px rgba(255, 0, 68, 0.2));
         }
+
+        /* Animation des tentacules */
+        @keyframes tentacle1 {
+            0%, 100% { transform: rotate(0deg); transform-origin: 150px 80px; }
+            25% { transform: rotate(8deg); }
+            50% { transform: rotate(-6deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        @keyframes tentacle2 {
+            0%, 100% { transform: rotate(0deg); transform-origin: 150px 80px; }
+            25% { transform: rotate(-8deg); }
+            50% { transform: rotate(6deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        .tentacle-left { animation: tentacle1 4s ease-in-out infinite; }
+        .tentacle-right { animation: tentacle2 4s ease-in-out infinite; }
 
         /* Titre */
         .title {
@@ -193,7 +211,7 @@
         /* Responsive */
         @media (max-width: 600px) {
             .title { font-size: 2.4em; }
-            .shark-container { width: 200px; height: 100px; }
+            .octopus-container { width: 220px; height: 220px; }
             .stats { gap: 20px; }
             .search-input { padding: 15px 50px 15px 18px; font-size: 0.95em; }
         }
@@ -218,30 +236,84 @@
 
     <div class="main-container">
 
-        <!-- Requin des abysses en SVG -->
-        <div class="shark-container">
-            <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
-                <!-- Corps -->
-                <ellipse cx="140" cy="75" rx="90" ry="28" fill="#0d1b3e" stroke="#00d4ff" stroke-width="2"/>
-                <!-- Tête -->
-                <ellipse cx="225" cy="72" rx="35" ry="22" fill="#0d1b3e" stroke="#00d4ff" stroke-width="2"/>
-                <!-- Aileron dorsal -->
-                <polygon points="140,48 150,20 160,48" fill="#0d1b3e" stroke="#00d4ff" stroke-width="2"/>
-                <!-- Queue -->
-                <polygon points="50,75 10,50 30,75 10,100 50,75" fill="#0d1b3e" stroke="#00d4ff" stroke-width="2"/>
-                <!-- Nageoire pectorale -->
-                <polygon points="180,95 170,120 160,95" fill="#0d1b3e" stroke="#00d4ff" stroke-width="1.5"/>
-                <!-- Œil -->
-                <circle cx="245" cy="68" r="5" fill="#ff0044"/>
-                <circle cx="246" cy="67" r="2" fill="#fff"/>
-                <!-- Branchies -->
-                <line x1="210" y1="65" x2="205" y2="85" stroke="#00d4ff" stroke-width="1.5" opacity="0.6"/>
-                <line x1="200" y1="63" x2="195" y2="83" stroke="#00d4ff" stroke-width="1.5" opacity="0.6"/>
-                <line x1="190" y1="62" x2="185" y2="82" stroke="#00d4ff" stroke-width="1.5" opacity="0.6"/>
-                <!-- Dents -->
-                <line x1="255" y1="72" x2="250" y2="78" stroke="#00d4ff" stroke-width="1"/>
-                <line x1="257" y1="74" x2="252" y2="80" stroke="#00d4ff" stroke-width="1"/>
-                <line x1="255" y1="76" x2="250" y2="82" stroke="#00d4ff" stroke-width="1"/>
+        <!-- Pieuvre des abysses en SVG -->
+        <div class="octopus-container">
+            <svg viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- Dégradé -->
+                <defs>
+                    <radialGradient id="octopusGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#1a3a5e;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#0d1b3e;stop-opacity:1" />
+                    </radialGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Tentacule gauche 1 -->
+                <g class="tentacle-left">
+                    <path d="M 130 80 Q 100 150, 80 240 Q 75 260, 90 280" stroke="#00d4ff" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.8"/>
+                    <circle cx="90" cy="280" r="8" fill="#ff0044" opacity="0.6"/>
+                </g>
+
+                <!-- Tentacule gauche 2 -->
+                <g class="tentacle-left" style="animation-delay: 0.3s;">
+                    <path d="M 120 85 Q 70 140, 50 250 Q 45 270, 65 285" stroke="#00d4ff" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.75"/>
+                    <circle cx="65" cy="285" r="7" fill="#ff0044" opacity="0.5"/>
+                </g>
+
+                <!-- Tentacule gauche 3 -->
+                <g class="tentacle-left" style="animation-delay: 0.6s;">
+                    <path d="M 135 90 Q 105 160, 110 270 Q 115 285, 135 295" stroke="#00d4ff" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.7"/>
+                    <circle cx="135" cy="295" r="6" fill="#ff0044" opacity="0.4"/>
+                </g>
+
+                <!-- Tentacule droite 1 -->
+                <g class="tentacle-right">
+                    <path d="M 170 80 Q 200 150, 220 240 Q 225 260, 210 280" stroke="#00d4ff" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.8"/>
+                    <circle cx="210" cy="280" r="8" fill="#ff0044" opacity="0.6"/>
+                </g>
+
+                <!-- Tentacule droite 2 -->
+                <g class="tentacle-right" style="animation-delay: 0.3s;">
+                    <path d="M 180 85 Q 230 140, 250 250 Q 255 270, 235 285" stroke="#00d4ff" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.75"/>
+                    <circle cx="235" cy="285" r="7" fill="#ff0044" opacity="0.5"/>
+                </g>
+
+                <!-- Tentacule droite 3 -->
+                <g class="tentacle-right" style="animation-delay: 0.6s;">
+                    <path d="M 165 90 Q 195 160, 190 270 Q 185 285, 165 295" stroke="#00d4ff" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.7"/>
+                    <circle cx="165" cy="295" r="6" fill="#ff0044" opacity="0.4"/>
+                </g>
+
+                <!-- Corps (tête) principal -->
+                <ellipse cx="150" cy="70" rx="45" ry="50" fill="url(#octopusGlow)" stroke="#00d4ff" stroke-width="2" filter="url(#glow)"/>
+
+                <!-- Yeux gauche -->
+                <circle cx="135" cy="55" r="10" fill="#00d4ff" opacity="0.9"/>
+                <circle cx="135" cy="55" r="6" fill="#0a0a1a"/>
+                <circle cx="137" cy="53" r="2.5" fill="#ff0044"/>
+
+                <!-- Yeux droite -->
+                <circle cx="165" cy="55" r="10" fill="#00d4ff" opacity="0.9"/>
+                <circle cx="165" cy="55" r="6" fill="#0a0a1a"/>
+                <circle cx="167" cy="53" r="2.5" fill="#ff0044"/>
+
+                <!-- Bouche (bec) -->
+                <circle cx="150" cy="80" r="5" fill="#ff0044" opacity="0.7"/>
+
+                <!-- Détails supplémentaires (veines luminescentes) -->
+                <path d="M 140 65 Q 145 70, 140 75" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.4"/>
+                <path d="M 160 65 Q 155 70, 160 75" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.4"/>
+
+                <!-- Photophores (organes luminescents) -->
+                <circle cx="145" cy="75" r="2" fill="#ff0044" opacity="0.8"/>
+                <circle cx="155" cy="78" r="2" fill="#ff0044" opacity="0.6"/>
+                <circle cx="150" cy="85" r="2" fill="#00d4ff" opacity="0.7"/>
             </svg>
         </div>
 
