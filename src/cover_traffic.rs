@@ -1,6 +1,7 @@
 use crate::circuit::manager::CircuitManager;
 use crate::protocol::onion::FinalPayload;
 use rand::Rng;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::time::{sleep, Duration};
@@ -8,7 +9,7 @@ use tokio::time::{sleep, Duration};
 pub struct CoverTrafficGenerator {
     pub mean_interval_ms: u64,
     pub circuit_manager: Arc<Mutex<CircuitManager>>,
-    pub running: bool,
+    pub running: Arc<AtomicBool>,
 }
 
 impl CoverTrafficGenerator {
@@ -16,14 +17,14 @@ impl CoverTrafficGenerator {
         Self {
             mean_interval_ms,
             circuit_manager,
-            running: false,
+            running: Arc::new(AtomicBool::new(false)),
         }
     }
 
-    pub async fn run(&mut self) {
-        self.running = true;
+    pub async fn run(&self) {
+        self.running.store(true, Ordering::SeqCst);
         let mut rng = rand::thread_rng();
-        while self.running {
+        while self.running.load(Ordering::SeqCst) {
             let base = self.mean_interval_ms as f64;
             let jitter = rng.r#gen::<f64>() * 1.0 + 0.5;
             let delay_ms = (-rng.r#gen::<f64>().ln() * base * jitter) as u64;
@@ -51,7 +52,7 @@ impl CoverTrafficGenerator {
         }
     }
 
-    pub fn stop(&mut self) {
-        self.running = false;
+    pub fn stop(&self) {
+        self.running.store(false, Ordering::SeqCst);
     }
 }
