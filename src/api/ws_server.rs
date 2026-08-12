@@ -8,24 +8,26 @@ use tracing::{error, info};
 
 use crate::api::websocket::{ClientMessage, SearchResultItem, ServerMessage};
 use crate::search::index::SearchIndex;
-use crate::AbyssNode;
 
-pub async fn start_websocket_with_search(
-    node: Arc<AbyssNode>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let addr = format!("127.0.0.1:{}", node.config.websocket_port);
+pub async fn start_websocket_server() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "127.0.0.1:9000";
     let listener = TcpListener::bind(&addr).await?;
     info!("WebSocket server listening on ws://{}", addr);
 
+    let search_index = Arc::new(Mutex::new(SearchIndex::new()));
+
     while let Ok((stream, _)) = listener.accept().await {
-        let node = node.clone();
-        tokio::spawn(handle_connection(stream, node));
+        let search_index = search_index.clone();
+        tokio::spawn(handle_connection(stream, search_index));
     }
 
     Ok(())
 }
 
-async fn handle_connection(stream: TcpStream, node: Arc<AbyssNode>) {
+async fn handle_connection(
+    stream: TcpStream,
+    search_index: Arc<Mutex<SearchIndex>>,
+) {
     let ws_stream = match accept_async(stream).await {
         Ok(ws) => ws,
         Err(e) => {
@@ -41,7 +43,7 @@ async fn handle_connection(stream: TcpStream, node: Arc<AbyssNode>) {
         match msg {
             Ok(Message::Text(text)) => {
                 if let Ok(client_msg) = serde_json::from_str::<ClientMessage>(&text) {
-                    let response = handle_message(client_msg, &node).await;
+                    let response = handle_message(client_msg, &search_index).await;
                     let json = serde_json::to_string(&response).unwrap();
                     if let Err(e) = write.send(Message::Text(json)).await {
                         error!("WebSocket send error: {}", e);
@@ -65,11 +67,14 @@ async fn handle_connection(stream: TcpStream, node: Arc<AbyssNode>) {
     }
 }
 
-async fn handle_message(msg: ClientMessage, node: &AbyssNode) -> ServerMessage {
+async fn handle_message(
+    msg: ClientMessage,
+    search_index: &Arc<Mutex<SearchIndex>>,
+) -> ServerMessage {
     match msg {
         ClientMessage::Search { query, tab_id } => {
             info!("Search request: '{}'", query);
-            let index = node.search_index.lock().await;
+            let index = search_index.lock().await;
             let results = index.search(&query);
             let items: Vec<SearchResultItem> = results
                 .iter()

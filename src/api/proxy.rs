@@ -4,7 +4,8 @@ use std::net::SocketAddr;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server};
 
-pub async fn start_proxy(port: u16) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_proxy() -> Result<(), Box<dyn std::error::Error>> {
+    let port = 9001u16;
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
     let make_svc =
         make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle_request)) });

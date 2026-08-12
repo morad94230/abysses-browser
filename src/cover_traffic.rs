@@ -56,3 +56,8 @@ impl CoverTrafficGenerator {
         self.running.store(false, Ordering::SeqCst);
     }
 }
+
+pub async fn generate_cover_traffic() {
+    // Simple function that doesn't do anything for now
+    // Can be extended later with actual traffic generation
+}
