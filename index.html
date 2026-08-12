@@ -49,55 +49,38 @@
             padding: 20px;
         }
 
-        /* Conteneur pour l'image de la pieuvre */
-        .octopus-container {
-            position: relative;
+        /* Hero décoratif (remplace l'image de la pieuvre) */
+        .hero-graphic {
             width: 720px;
             max-width: 92vw;
-            height: auto;
-            animation: floaty 6s ease-in-out infinite;
-            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.35));
-        }
-
-        @keyframes floaty {
-            0%,100% { transform: translateY(0) rotate(-0.8deg); }
-            50% { transform: translateY(-8px) rotate(0.8deg); }
-        }
-
-        .octopus-image {
-            width: 100%;
-            height: auto;
-            display: block;
+            height: 220px;
             border-radius: 12px;
-            object-fit: cover;
+            background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.12), rgba(0,0,0,0.25)), linear-gradient(180deg, rgba(3,6,23,0.6), rgba(0,0,0,0.4));
+            display: flex;
+            align-items: center;
+            justify-content: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            transition: transform 0.3s ease;
-            will-change: transform;
+            position: relative;
+            overflow: hidden;
+            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.25));
         }
 
-        /* léger parallax / sway quand on survole */
-        .octopus-container:hover .octopus-image {
-            transform: translateY(-6px) scale(1.01);
-        }
-
-        /* Survol du curseur : yeux suivent le pointeur (si image possède des yeux au centre visuel) */
-        .octopus-overlay {
+        /* Subtle animated rings */
+        .ring {
             position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-
-        .octopus-glow {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 30%;
-            height: 30%;
-            transform: translate(-50%, -50%);
             border-radius: 50%;
-            background: radial-gradient(circle at 40% 30%, rgba(0,212,255,0.18), transparent 40%);
-            mix-blend-mode: screen;
-            pointer-events: none;
+            border: 1px solid rgba(0,212,255,0.12);
+            width: 160px;
+            height: 160px;
+            animation: pulse 6s linear infinite;
+        }
+        .ring.r2 { width: 260px; height: 260px; animation-duration: 9s; opacity: 0.8; }
+        .ring.r3 { width: 380px; height: 380px; animation-duration: 12s; opacity: 0.6; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.85); opacity: 0.2; }
+            50% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(0.85); opacity: 0.2; }
         }
 
         /* Titre */
@@ -182,7 +165,7 @@
         /* Responsive */
         @media (max-width: 600px) {
             .title { font-size: 2.4em; }
-            .octopus-container { width: 92vw; }
+            .hero-graphic { width: 92vw; height: 160px; }
             .stats { gap: 20px; }
             .search-input { padding: 15px 50px 15px 18px; font-size: 0.95em; }
         }
@@ -207,13 +190,11 @@
 
     <div class="main-container">
 
-        <!-- Pieuvre des abysses (image utilisateur) -->
-        <div class="octopus-container" id="octoContainer">
-            <!-- Place image here: upload votre image à assets/octopus.png dans le repo, ou fournissez une URL publique. -->
-            <img class="octopus-image" id="octoImg" src="assets/octopus.png" alt="Pieuvre des abysses">
-            <div class="octopus-overlay">
-                <div class="octopus-glow" id="octoGlow"></div>
-            </div>
+        <!-- Hero décoratif (image supprimée) -->
+        <div class="hero-graphic" aria-hidden="true">
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
         </div>
 
         <!-- Titre -->
@@ -224,7 +205,7 @@
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Explorez les abysses..." id="searchInput" onkeydown="if(event.key==='Enter') search()">
             <button class="search-button" onclick="search()">
-                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.[...]"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.[...][...]"/></svg>
             </button>
         </div>
 
@@ -275,24 +256,6 @@
             }
         }, 5000);
 
-        // Petit script pour déplacer un point lumineux vers le curseur (effet d'interaction)
-        (function() {
-            const glow = document.getElementById('octoGlow');
-            const container = document.getElementById('octoContainer');
-            if (!glow || !container) return;
-            container.addEventListener('mousemove', e => {
-                const r = container.getBoundingClientRect();
-                const x = ((e.clientX - r.left) / r.width) * 100;
-                const y = ((e.clientY - r.top) / r.height) * 100;
-                glow.style.left = x + '%';
-                glow.style.top = y + '%';
-                glow.style.transform = 'translate(-50%, -50%) scale(1)';
-            });
-            container.addEventListener('mouseleave', () => {
-                glow.style.left = '50%';
-                glow.style.top = '50%';
-            });
-        })();
     </script>
 </body>
 </html>
